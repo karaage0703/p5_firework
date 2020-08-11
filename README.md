@@ -5,6 +5,7 @@ Firework visualization with sound made by processing
 
 # Dependency
 - Processing 3
+- minim(Processing audio library)
 
 # Setup
 Execute following commands:
