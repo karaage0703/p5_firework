@@ -16,10 +16,14 @@ void setup() {
   colorMode(HSB, 360, 100, 100, 100);
   smooth();
   Firework = new ArrayList<Firework>();
+  background(51);
 }
 
 void draw() {
-  background(51);
+  fill(51, 50);
+  noStroke();
+  rect(0, 0, width, height);
+
   for (int i = 0; i < Firework.size(); i++) {
     Firework fw = Firework.get(i);
     fw.run();
@@ -85,10 +89,11 @@ class FireBall {
   void draw() {
     if (seed) {
       stroke(c, lifeBall);
+      strokeWeight(10);
     } else {
       stroke(c, lifeFlower);
+      strokeWeight(8);
     }
-    strokeWeight(10);
     point(pos.x, pos.y);
   }
   void applyForce(PVector force) {
