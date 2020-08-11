@@ -23,6 +23,7 @@ This software is released under the MIT License, see LICENSE.
 - karaage0703
 
 # References
+- https://thecodingtrain.com/CodingChallenges/027-fireworks.html
 - https://github.com/CodingTrain/website/tree/master/CodingChallenges/CC_027_FireWorks/P5
 - https://processing-fan.firebaseapp.com/galary/fire-flower/index.html
 - https://takawo.hatenablog.com/entry/2017/09/28/192942
