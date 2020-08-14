@@ -13,7 +13,8 @@ ArrayList<Firework> fireworks;
 
 void setup() {
   // graphics
-  size(1600, 800);
+  //size(1200, 1080);
+  fullScreen();
   colorMode(HSB, 360, 100, 100, 100);
   smooth();
   background(0);
@@ -29,7 +30,7 @@ void setup() {
 
 void draw() {
   // refresh graphics
-  fill(0, random(20, 50)); // alpha for gradual fading, should be aware of the performance problems
+  fill(0, random(30, 60)); // alpha for gradual fading, should be aware of the performance problems
   noStroke();
   rect(0, 0, width, height);
 
@@ -49,6 +50,7 @@ void keyPressed() {
   else if (key == '2') fireworks.add(new Firework(2));
   else if (key == '3') fireworks.add(new Firework(3));
   else if (key == '4') fireworks.add(new Firework(4));
+  else if (key == '5') fireworks.add(new Firework(5));
 }
 
 void stop() {
@@ -76,7 +78,7 @@ class Firework {
   int particleNum;
 
   Firework(int _fireworkSize) {
-    float ballShellHue = 50.0;
+    float ballShellHue = random(40, 60);
     fireworkSize = _fireworkSize;
     
     // define number of particles
@@ -84,6 +86,7 @@ class Firework {
     else if (_fireworkSize == 2 ) particleNum = 200;
     else if (_fireworkSize == 3 ) particleNum = 300;
     else if (_fireworkSize == 4 ) particleNum = 400;
+    else if (_fireworkSize == 5 ) particleNum = 300;
     
     ballShell = new BallShell(random(width), height, ballShellHue);
     particles = new ArrayList<Particle>();
@@ -92,25 +95,34 @@ class Firework {
   }
 
   void run() {
+    // BALL SHELL'S LIFE
     if (ballShell != null) {
       ballShell.applyForce(gravity);
       ballShell.update();
       ballShell.draw();
       
+      // BALL SHELL EXPLODES!!!      
       if (ballShell.readyToExplode()) {
+        // color variations and limitations by fireworkSize(s)
+        boolean withRandomMove = false;
         float seedParticleHue = random(360);
+        if (fireworkSize == 1 ) seedParticleHue = random(40, 60);
+        else if (fireworkSize == 4 ) seedParticleHue = random(40, 60);
+        else if (fireworkSize == 5 ) withRandomMove = true;
+
         float particleHue = seedParticleHue;
         boolean isSpecialColors = (random(0,10) < 0.2); // rottery
         
         for (int i = 0; i < particleNum; i++) {
           if (isSpecialColors) seedParticleHue = random(360);
           particleHue = seedParticleHue + random(-10, 10);
-          particles.add(new Particle(ballShell.pos, particleHue, fireworkSize));
+          particles.add(new Particle(ballShell.pos, particleHue, fireworkSize, withRandomMove));
         }
-        ballShell = null;
+        ballShell = null; // a ball shell ends its life
       }
     }
 
+    // PARTICLE(S)' LIFE
     for (int i = 0; i < particles.size(); i++) {
       Particle child = particles.get(i);
       child.applyForce(gravity);
@@ -144,11 +156,13 @@ class Particle {
   float particleFade = 20;
   float lifeSpan = random(particleFade/50, particleFade/30);
   boolean isLaunching = false; // launching: true or exploded: false
+  boolean withRandomMove = false;
   
   Particle() {
   }
 
-  Particle(PVector _pos, float hue, int fireworkSize) {
+  Particle(PVector _pos, float hue, int fireworkSize, boolean _withRandomMove) {
+    withRandomMove = _withRandomMove;
     pos = new PVector(_pos.x, _pos.y);
     vel = PVector.random2D().mult(random(random(0.5, 5), 6));
     acc = new PVector(0, 0.1);
@@ -158,6 +172,7 @@ class Particle {
     else if (fireworkSize == 2) lifeSpan = random(particleFade/100, particleFade/60);
     else if (fireworkSize == 3) lifeSpan = random(particleFade/150, particleFade/90);
     else if (fireworkSize == 4) lifeSpan = random(particleFade/200, particleFade/120);
+    else if (fireworkSize == 5) lifeSpan = random(particleFade/150, particleFade/90);
   }
 
   void run() {
@@ -169,10 +184,16 @@ class Particle {
     pos.add(vel);
     vel.add(acc);
     acc.mult(0);
+    
+    vel.add((random(-0.05, 0.05)), 0); // randomize a bit of the velocities
+
+    if (withRandomMove) vel.add(random(-0.4, 0.4), random(-0.4, 0.4));
+    
     if (!isLaunching) {
       particleFade -= lifeSpan;
       vel.mult(0.98);
     }
+    
   }
   
   void draw() {
@@ -210,6 +231,8 @@ class BallShell extends Particle {
     pos.add(vel);
     vel.add(acc);
     acc.mult(0);
+    
+    vel.add((random(-0.1, 0.1)), 0); // randomize a bit of the velocities
     if (isLaunching) ballShellFade -= 2;
   }
   
