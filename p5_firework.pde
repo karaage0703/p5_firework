@@ -13,8 +13,8 @@ ArrayList<Firework> fireworks;
 
 void setup() {
   // graphics
-  size(640, 480);
-  // fullScreen();
+  // size(640, 480);
+  fullScreen();
   colorMode(HSB, 360, 100, 100, 100);
   smooth();
   background(0);
