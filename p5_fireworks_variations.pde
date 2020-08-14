@@ -16,7 +16,7 @@ void setup() {
   size(1600, 800);
   colorMode(HSB, 360, 100, 100, 100);
   smooth();
-  background(20);
+  background(0);
 
   // audio
   minim = new Minim(this);
@@ -29,7 +29,7 @@ void setup() {
 
 void draw() {
   // refresh graphics
-  fill(20);
+  fill(0, random(20, 50)); // alpha for gradual fading, should be aware of the performance problems
   noStroke();
   rect(0, 0, width, height);
 
@@ -71,7 +71,6 @@ void stop() {
 class Firework {
   BallShell ballShell;
   ArrayList<Particle> particles;
-
   float hue;
   int fireworkSize;
   int particleNum;
@@ -98,7 +97,7 @@ class Firework {
       ballShell.update();
       ballShell.draw();
       
-      if (ballShell.explode()) {
+      if (ballShell.readyToExplode()) {
         float seedParticleHue = random(360);
         float particleHue = seedParticleHue;
         boolean isSpecialColors = (random(0,10) < 0.2); // rottery
@@ -134,34 +133,31 @@ class Firework {
 // - void draw()
 // - void applyForce(PVector force)
 // - boolean isDead()
-// - boolean explode()
 
 class Particle {
   PVector pos;
   PVector vel;
   PVector acc;
-
-  float particleLife = 100;
-  float fireworkLife = 100;
-  float lifeSpan = random(fireworkLife/50, fireworkLife/30);
-  boolean isLaunching = false; // launching: true or exploded: false
   color c;
+
+  float ballShellFade = 100;
+  float particleFade = 20;
+  float lifeSpan = random(particleFade/50, particleFade/30);
+  boolean isLaunching = false; // launching: true or exploded: false
   
   Particle() {
   }
 
-
   Particle(PVector _pos, float hue, int fireworkSize) {
     pos = new PVector(_pos.x, _pos.y);
-    vel = PVector.random2D();
-    vel.mult(random(3, 6));
+    vel = PVector.random2D().mult(random(random(0.5, 5), 6));
     acc = new PVector(0, 0.1);
     c = color(hue, 255, 255);
 
-    if (fireworkSize == 1) lifeSpan = random(fireworkLife/50, fireworkLife/30);
-    else if (fireworkSize == 2) lifeSpan = random(fireworkLife/100, fireworkLife/60);
-    else if (fireworkSize == 3) lifeSpan = random(fireworkLife/200, fireworkLife/120);
-    else if (fireworkSize == 4) lifeSpan = random(fireworkLife/400, fireworkLife/240);
+    if (fireworkSize == 1) lifeSpan = random(particleFade/50, particleFade/30);
+    else if (fireworkSize == 2) lifeSpan = random(particleFade/100, particleFade/60);
+    else if (fireworkSize == 3) lifeSpan = random(particleFade/150, particleFade/90);
+    else if (fireworkSize == 4) lifeSpan = random(particleFade/200, particleFade/120);
   }
 
   void run() {
@@ -172,18 +168,16 @@ class Particle {
   void update() {
     pos.add(vel);
     vel.add(acc);
-    if (isLaunching) {
-      particleLife -= 1;
-    } else {
-      fireworkLife -= lifeSpan;
+    acc.mult(0);
+    if (!isLaunching) {
+      particleFade -= lifeSpan;
       vel.mult(0.98);
     }
-    acc.mult(0);
   }
   
   void draw() {
-    stroke(c, fireworkLife);
-    strokeWeight(8);
+    stroke(c, particleFade);
+    strokeWeight(random(4, 8)); // randomize the strength of the light
     point(pos.x, pos.y);
   }
   
@@ -192,20 +186,16 @@ class Particle {
   }
   
   boolean isDead() {
-    return (fireworkLife < 0);
+    return (particleFade < 0);
   }
 
-  boolean explode() {
-    if (isLaunching && vel.y > 0) {
-      lifeSpan = 0;
-      return true;
-    }
-    return false;
-  }
 }
 
 //////// BALLSHELL ////////
 // - BallShell(float x, float y, float hue)
+// - 
+// - 
+// - boolean readyToExplode()
 
 class BallShell extends Particle {
   BallShell(float x, float y, float hue) {
@@ -216,11 +206,22 @@ class BallShell extends Particle {
     isLaunching = true;
   }
   
+  void update() {
+    pos.add(vel);
+    vel.add(acc);
+    acc.mult(0);
+    if (isLaunching) ballShellFade -= 2;
+  }
+  
   void draw() {
-    if (isLaunching) {
-      stroke(c, particleLife);
-      strokeWeight(10);
+    if (isLaunching) { // before explode and still going up
+      stroke(c, ballShellFade);
+      strokeWeight(random(5, 10)); // randomize the strength of the light
+      point(pos.x, pos.y);
     }
-    point(pos.x, pos.y);
+  }
+  
+  boolean readyToExplode() {
+    return (isLaunching && vel.y > 0);
   }
 }
