@@ -2,214 +2,249 @@ import ddf.minim.*;
 
 Minim minim;
 AudioSample sound;
+PVector gravity;
+ArrayList<Firework> fireworks;
 
-PVector gravity = new PVector(0.0, 0.1);
-ArrayList<Firework> Firework;
+//////// MAIN /////////
+// - setup()
+// - draw()
+// - keyPressed()
+// - stop()
 
 void setup() {
-  // for audio
+  // graphics
+  size(640, 480);
+  // fullScreen();
+  colorMode(HSB, 360, 100, 100, 100);
+  smooth();
+  background(0);
+
+  // audio
   minim = new Minim(this);
   sound = minim.loadSample("firework_sound.mp3", 2048);
 
-//  size(960, 540);
-  size(1600, 800);
-  colorMode(HSB, 360, 100, 100, 100);
-  smooth();
-  Firework = new ArrayList<Firework>();
-  background(51);
+  // instances
+  gravity = new PVector(0.0, 0.1);
+  fireworks = new ArrayList<Firework>();
 }
 
 void draw() {
-  fill(51, 50);
+  // refresh graphics
+  fill(0, random(30, 60)); // alpha for gradual fading, should be aware of the performance problems
   noStroke();
   rect(0, 0, width, height);
 
-  for (int i = 0; i < Firework.size(); i++) {
-    Firework fw = Firework.get(i);
-    fw.run();
-    if (fw.done()) {
-      Firework.remove(fw);
+  // draw each Firework by loop
+  for (int i = 0; i < fireworks.size(); i++) {
+    Firework firework = fireworks.get(i);
+    firework.run();
+    if (firework.done()) {
+      fireworks.remove(firework);
     }
   }
 }
 
+void keyPressed() {
+  // trigger Firework(s)
+  if (key == '1')      fireworks.add(new Firework(1));
+  else if (key == '2') fireworks.add(new Firework(2));
+  else if (key == '3') fireworks.add(new Firework(3));
+  else if (key == '4') fireworks.add(new Firework(4));
+  else if (key == '5') fireworks.add(new Firework(5));
+}
 
-class FireBall {
+void stop() {
+  // terminate audio/graphics
+  sound.close();
+  minim.stop();
+  super.stop();
+}
+
+//////// CLASSES /////////
+// - Firework: Firework consists of one BallShell and multiple Particle(s).
+// - Particle:
+// - BallShell: BallShell extends Particle.
+
+//////// FIREWORK ////////
+// - Firework(int _fireworkSize)
+// - void run()
+// - boolean done()
+
+class Firework {
+  BallShell ballShell;
+  ArrayList<Particle> particles;
+  float hue;
+  int fireworkSize;
+  int particleNum;
+
+  Firework(int _fireworkSize) {
+    float ballShellHue = random(40, 60);
+    fireworkSize = _fireworkSize;
+
+    // define number of particles
+    if (_fireworkSize == 1 )      particleNum = 100;
+    else if (_fireworkSize == 2 ) particleNum = 200;
+    else if (_fireworkSize == 3 ) particleNum = 300;
+    else if (_fireworkSize == 4 ) particleNum = 400;
+    else if (_fireworkSize == 5 ) particleNum = 300;
+
+    ballShell = new BallShell(random(width), height, ballShellHue);
+    particles = new ArrayList<Particle>();
+
+    sound.trigger();
+  }
+
+  void run() {
+    // BALL SHELL'S LIFE
+    if (ballShell != null) {
+      ballShell.applyForce(gravity);
+      ballShell.update();
+      ballShell.draw();
+
+      // BALL SHELL EXPLODES!!!
+      if (ballShell.readyToExplode()) {
+        // color variations and limitations by fireworkSize(s)
+        boolean withRandomMove = false;
+        float seedParticleHue = random(360);
+        if (fireworkSize == 1 ) seedParticleHue = random(40, 60);
+        else if (fireworkSize == 4 ) seedParticleHue = random(40, 60);
+        else if (fireworkSize == 5 ) withRandomMove = true;
+
+        float particleHue = seedParticleHue;
+        boolean isSpecialColors = (random(0,10) < 0.2); // rottery
+
+        for (int i = 0; i < particleNum; i++) {
+          if (isSpecialColors) seedParticleHue = random(360);
+          particleHue = seedParticleHue + random(-10, 10);
+          particles.add(new Particle(ballShell.pos, particleHue, fireworkSize, withRandomMove));
+        }
+        ballShell = null; // a ball shell ends its life
+      }
+    }
+
+    // PARTICLE(S)' LIFE
+    for (int i = 0; i < particles.size(); i++) {
+      Particle child = particles.get(i);
+      child.applyForce(gravity);
+      child.run();
+      if (child.isDead()) particles.remove(child);
+    }
+  }
+
+  boolean done() { // removed if
+    return (ballShell == null && particles.isEmpty());
+  }
+
+}
+
+//////// PARTICLE ////////
+// - Particle(float x, float y, float hue)
+// - Particle(PVector _pos, float hue, int fireworkSize)
+// - void run()
+// - void update()
+// - void draw()
+// - void applyForce(PVector force)
+// - boolean isDead()
+
+class Particle {
   PVector pos;
   PVector vel;
   PVector acc;
-
-  float lifeBall = 100;
-
-  float lifeFlower = 100;
-  float lifeSpan = random(lifeFlower/50, lifeFlower/30);
-  boolean seed = false;
   color c;
 
-  FireBall(float x, float y, float hue) {
-    pos = new PVector(x, y);
-    vel = new PVector(0, random(-12, -6));
-    acc = new PVector(0, 0.1);
-    c = color(hue, 255, 255);
-    seed = true;
+  float ballShellFade = 100;
+  float particleFade = 20;
+  float lifeSpan = random(particleFade/50, particleFade/30);
+  boolean isLaunching = false; // launching: true or exploded: false
+  boolean withRandomMove = false;
+
+  Particle() {
   }
 
-  FireBall(PVector _pos, float hue, int flowerSize) {
+  Particle(PVector _pos, float hue, int fireworkSize, boolean _withRandomMove) {
+    withRandomMove = _withRandomMove;
     pos = new PVector(_pos.x, _pos.y);
-    vel = PVector.random2D();
-    vel.mult(random(3, 6));
+    vel = PVector.random2D().mult(random(random(0.5, 5), 6));
     acc = new PVector(0, 0.1);
     c = color(hue, 255, 255);
 
-    if (flowerSize == 1){
-      lifeSpan = random(lifeFlower/50, lifeFlower/30);
-    }
-    if (flowerSize == 2) {
-      lifeSpan = random(lifeFlower/100, lifeFlower/60);
-    }
-    if (flowerSize == 3) {
-      lifeSpan = random(lifeFlower/200, lifeFlower/120);
-    }
-    if (flowerSize == 4) {
-      lifeSpan = random(lifeFlower/400, lifeFlower/240);
-    }
+    if (fireworkSize == 1) lifeSpan = random(particleFade/50, particleFade/30);
+    else if (fireworkSize == 2) lifeSpan = random(particleFade/100, particleFade/60);
+    else if (fireworkSize == 3) lifeSpan = random(particleFade/150, particleFade/90);
+    else if (fireworkSize == 4) lifeSpan = random(particleFade/200, particleFade/120);
+    else if (fireworkSize == 5) lifeSpan = random(particleFade/150, particleFade/90);
   }
 
-  void update() {
-    pos.add(vel);
-    vel.add(acc);
-    if (seed) {
-      lifeBall -= 1;
-    } else {
-      lifeFlower -= lifeSpan;
-      vel.mult(0.98);
-    }
-    acc.mult(0);
-  }
-  void draw() {
-    if (seed) {
-      stroke(c, lifeBall);
-      strokeWeight(10);
-    } else {
-      stroke(c, lifeFlower);
-      strokeWeight(8);
-    }
-    point(pos.x, pos.y);
-  }
-  void applyForce(PVector force) {
-    acc.add(force);
-  }
   void run() {
     update();
     draw();
   }
 
+  void update() {
+    pos.add(vel);
+    vel.add(acc);
+    acc.mult(0);
+
+    vel.add((random(-0.05, 0.05)), 0); // randomize a bit of the velocities
+
+    if (withRandomMove) vel.add(random(-0.4, 0.4), random(-0.4, 0.4));
+
+    if (!isLaunching) {
+      particleFade -= lifeSpan;
+      vel.mult(0.98);
+    }
+
+  }
+
+  void draw() {
+    stroke(c, particleFade);
+    strokeWeight(random(4, 8)); // randomize the strength of the light
+    point(pos.x, pos.y);
+  }
+
+  void applyForce(PVector force) {
+    acc.add(force);
+  }
+
   boolean isDead() {
-    if (lifeFlower < 0) {
-      return true;
-    }
-    return false;
-  }
-
-  boolean explode() {
-    if (seed && vel.y > 0) {
-      lifeSpan = 0;
-      return true;
-    }
-    return false;
-  }
-}
-
-class Firework {
-  ArrayList<FireBall> fireBalls;
-  FireBall ball;
-  float hue;
-
-  int flowerSize = 0;
-  int ballNumb = 100;
-
-  Firework() {
-  }
-
-  Firework(int _flowerSize) {
-    hue = random(360);
-    ball = new FireBall(random(width), height, hue);
-    fireBalls = new ArrayList<FireBall>();
-    flowerSize = _flowerSize;
-    if (_flowerSize == 1 ){
-      ballNumb = 100;
-    }
-    if (_flowerSize == 2 ){
-      ballNumb = 200;
-    }
-    if (_flowerSize == 3 ){
-      ballNumb = 300;
-    }
-    if (_flowerSize == 4 ){
-      ballNumb = 400;
-    }
-  }
-
-  boolean done() {
-    if (ball == null && fireBalls.isEmpty()) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  void run() {
-    if (ball != null) {
-      ball.applyForce(gravity);
-      ball.update();
-      ball.draw();
-      if (ball.explode()) {
-        for (int i = 0; i < ballNumb; i++) {
-          fireBalls.add(new FireBall(ball.pos, hue, flowerSize));
-        }
-        ball = null;
-      }
-    }
-
-    for (int i = 0; i < fireBalls.size(); i++) {
-      FireBall child = fireBalls.get(i);
-      child.applyForce(gravity);
-      child.run();
-      if (child.isDead()) {
-        fireBalls.remove(child);
-      }
-    }
-  }
-}
-
-
-void keyPressed() {
-  if (key == '1'){
-    sound.trigger();
-    Firework.add(new Firework(1));
-  }
-
-  if (key == '2'){
-    sound.trigger();
-    Firework.add(new Firework(2));
-  }
-
-  if (key == '3'){
-    sound.trigger();
-    Firework.add(new Firework(3));
-  }
-
-  if (key == '4'){
-    sound.trigger();
-    Firework.add(new Firework(4));
+    return (particleFade < 0);
   }
 
 }
 
+//////// BALLSHELL ////////
+// - BallShell(float x, float y, float hue)
+// -
+// -
+// - boolean readyToExplode()
 
-void stop() {
-  sound.close();
-  minim.stop();
+class BallShell extends Particle {
+  BallShell(float x, float y, float hue) {
+    pos = new PVector(x, y);
+    vel = new PVector(0, random(-12, -6));
+    acc = new PVector(0, 0.1);
+    c = color(hue, 255, 255);
+    isLaunching = true;
+  }
 
-  super.stop();
+  void update() {
+    pos.add(vel);
+    vel.add(acc);
+    acc.mult(0);
+
+    vel.add((random(-0.1, 0.1)), 0); // randomize a bit of the velocities
+    if (isLaunching) ballShellFade -= 2;
+  }
+
+  void draw() {
+    if (isLaunching) { // before explode and still going up
+      stroke(c, ballShellFade);
+      strokeWeight(random(5, 10)); // randomize the strength of the light
+      point(pos.x, pos.y);
+    }
+  }
+
+  boolean readyToExplode() {
+    return (isLaunching && vel.y > 0);
+  }
 }
