@@ -6,7 +6,7 @@ Firework visualization with sound made by processing
 # Dependency
 - Processing 3
 - minim(Processing audio library)
-- PostFX
+- PostFX(Processing visualization effect library)
 
 # Setup
 Execute following commands:
@@ -23,6 +23,9 @@ This software is released under the MIT License, see LICENSE.
 
 # Authors
 - karaage0703
+
+# Contributors
+- [tomo-makes](https://github.com/tomo-makes)
 
 # References
 - https://thecodingtrain.com/CodingChallenges/027-fireworks.html
