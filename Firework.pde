@@ -16,10 +16,10 @@ class Firework {
     fireworkCategory = _fireworkCategory;
     particleNum = _particleNum;
     fadeDecrement = _fadeDecrement;
-    
+
     ballShell = new BallShell(_x, _y, ballShellHue);
     particles = new ArrayList<Particle>();
-    
+
     sound.trigger();
   }
 
@@ -29,8 +29,8 @@ class Firework {
       ballShell.applyForce(gravity);
       ballShell.update();
       ballShell.draw();
-      
-      // BALL SHELL EXPLODES!!!      
+
+      // BALL SHELL EXPLODES!!!
       if (ballShell.readyToExplode()) {
         // color variations and limitations by fireworkCategory(s)
         boolean withRandomMove = false;
@@ -41,12 +41,12 @@ class Firework {
 
         float particleHue = seedParticleHue;
         boolean isSpecialColors = (random(0,10) < 0.2); // rottery
-        
+
         for (int i = 0; i < particleNum; i++) {
           if (isSpecialColors) seedParticleHue = random(360);
           particleHue = seedParticleHue + random(-10, 10);
           if (fireworkCategory == 6 && i > (particleNum / 2)) {
-            particles.add(new Particle(ballShell.pos, random(40, 60), fadeDecrement, withRandomMove, false));            
+            particles.add(new Particle(ballShell.pos, random(40, 60), fadeDecrement, withRandomMove, false));
           } else {
             particles.add(new Particle(ballShell.pos, particleHue, fadeDecrement, withRandomMove, true));
           }
@@ -63,7 +63,7 @@ class Firework {
       if (child.isDead()) particles.remove(child);
     }
   }
-    
+
   boolean done() { // removed if
     return (ballShell == null && particles.isEmpty());
   }
