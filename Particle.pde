@@ -14,7 +14,7 @@ class Particle {
   color c;
 
   float ballShellBrightness = 100;
-  float particleBrightness = 60;
+  float particleBrightness = 100;
   float velocityDecrement = 0.975;
   float particleBrightnessDecrement;
 
