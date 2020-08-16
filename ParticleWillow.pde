@@ -7,7 +7,8 @@
 // - void applyForce(PVector force)
 // - boolean isDead()
 
-class Particle extends ParticleBase {
+// TODO: Implementing Willow-style Particles
+class ParticleWillow extends Particle {
   PVector pos;
   PVector vel;
   PVector acc;
@@ -16,40 +17,33 @@ class Particle extends ParticleBase {
   // default parameters
   int fadeDecrement = 3;
   int particleHue = 50;
-  float ballShellBrightness = 100;
-  float particleBrightness = 60;
-  float velocityDecrement = 0.975;
+  float particleBrightness = 20;
+  float velocityDecrement = 0.985;
   float particleBrightnessDecrement;
   boolean isLaunching = false;       // launching: true or exploded: false
   boolean withRandomMove = false;    // random move
+  boolean withWillowBlur = false;    // TODO: Willow effect
   boolean visible = true;            // control deplayed sparkles
   
-  Particle() { // dummy constructor for extended classes
-  }
-
-  Particle(PVector _pos, float _particleHue, int _fadeDecrement, boolean _withRandomMove, boolean _visible) {
+  // special parameters for Willow
+  ArrayList<PVector> exCoords;       // buffering previous coordinates
+  
+  ParticleWillow(PVector _pos, float _particleHue, int _fadeDecrement, boolean _withRandomMove, boolean _visible) {
     fadeDecrement = _fadeDecrement;
     withRandomMove = _withRandomMove;
     visible = _visible;
-    pos = new PVector(_pos.x, _pos.y);
-
-    if (visible) { 
-      vel = PVector.random2D().mult(random(random(0.5, 5), 6));
-    } else {
-      // special particle (delayed sparkles) 
-      vel = PVector.random2D().mult(random(random(0.5, 4), 5));
-    }
     
+    pos = new PVector(_pos.x, _pos.y);
+    exCoords = new ArrayList<PVector>();
+    exCoords.add(pos);
+    vel = PVector.random2D().mult(random(random(0.5, 5), 6));    
     acc = new PVector(0, 0.1);
     c = color(_particleHue, 255, 255);
-    particleBrightnessDecrement = particleBrightness/random(fadeDecrement*20, fadeDecrement*40);
+
+    particleBrightnessDecrement = particleBrightness/random(fadeDecrement * 8, fadeDecrement * 15);
   }
 
-  void run() {
-    update();
-    draw();
-  }
-  
+
   void update() {
     pos.add(vel);
     vel.add(acc);
@@ -69,15 +63,22 @@ class Particle extends ParticleBase {
       particleBrightness = 60;
       particleBrightnessDecrement *= 2;
     }
+    
+    exCoords.add(new PVector(pos.x, pos.y));
   }
   
-  void draw() {
-    if (visible) { // experimental. toggle refresh on/off
-      stroke(c, particleBrightness);
-      strokeWeight(random(5, 10)); 
-      point(pos.x+random(-2, 2), pos.y+random(-2, 2));
-      strokeWeight(3); 
+  void draw() {    
+    for (int i = 0; i < exCoords.size(); i++) {
+      PVector pos = exCoords.get(i);
+      strokeWeight(3 + random(i/3,i/3+2)); 
+      stroke(c, particleBrightness/4);
       point(pos.x+random(-1, 1), pos.y+random(-1, 1));
+      strokeWeight(3); 
+      stroke(c, particleBrightness/2);
+      point(pos.x+random(-1, 1), pos.y+random(-1, 1));
+    }
+    if (exCoords.size() > 25) {
+      exCoords.remove(0);
     }
   }
   
@@ -88,7 +89,6 @@ class Particle extends ParticleBase {
   boolean isDead() {
     return (particleBrightness < 0);
   }
-  
   void setCoords(PVector _pos) {
     pos = _pos;
   }

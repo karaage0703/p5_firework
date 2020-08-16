@@ -5,8 +5,8 @@
 // - boolean readyToExplode()
 
 class BallShell extends Particle {
-  BallShell(float x, float y, float hue) {
-    pos = new PVector(x, y);
+  BallShell(PVector _launch_coords, float hue) {
+    pos = _launch_coords;
     vel = new PVector(0, random(-12, -6));
     acc = new PVector(0, 0.1);
     c = color(hue, 255, 255);
