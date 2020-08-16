@@ -27,8 +27,8 @@ void setup() {
   fx = new PostFX(this);
 
   // audio
-  //minim = new Minim(this);
-  //sound = minim.loadSample("firework_sound.mp3", 2048);
+  minim = new Minim(this);
+  sound = minim.loadSample("firework_sound.mp3", 2048);
 
   // instances
   gravity = new PVector(0.0, 0.1);
@@ -126,8 +126,8 @@ void keyPressed() {
 }
 
 void stop() {
-  //sound.close();
-  //minim.stop();
+  sound.close();
+  minim.stop();
   super.stop();
 }
 
