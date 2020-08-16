@@ -7,28 +7,28 @@
 // - void applyForce(PVector force)
 // - boolean isDead()
 
-class Particle {
+class Particle extends ParticleBase {
   PVector pos;
   PVector vel;
   PVector acc;
   color c;
 
+  // default parameters
+  int fadeDecrement = 3;
+  int particleHue = 50;
   float ballShellBrightness = 100;
   float particleBrightness = 100;
   float velocityDecrement = 0.975;
   float particleBrightnessDecrement;
-
-  // launch state
   boolean isLaunching = false;       // launching: true or exploded: false
-
-  // special particle
   boolean withRandomMove = false;    // random move
   boolean visible = true;            // control deplayed sparkles
 
   Particle() { // dummy constructor for extended classes
   }
 
-  Particle(PVector _pos, float hue, int fadeDecrement, boolean _withRandomMove, boolean _visible) {
+  Particle(PVector _pos, float _particleHue, int _fadeDecrement, boolean _withRandomMove, boolean _visible) {
+    fadeDecrement = _fadeDecrement;
     withRandomMove = _withRandomMove;
     visible = _visible;
     pos = new PVector(_pos.x, _pos.y);
@@ -41,7 +41,7 @@ class Particle {
     }
 
     acc = new PVector(0, 0.1);
-    c = color(hue, 255, 255);
+    c = color(_particleHue, 255, 255);
     particleBrightnessDecrement = particleBrightness/random(fadeDecrement*20, fadeDecrement*40);
   }
 
@@ -87,6 +87,10 @@ class Particle {
 
   boolean isDead() {
     return (particleBrightness < 0);
+  }
+  
+  void setCoords(PVector _pos) {
+    pos = _pos;
   }
 
 }

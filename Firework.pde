@@ -1,71 +1,70 @@
-//////// FIREWORK ////////
-// - Firework(float _x, float _y, int _fireworkCategory, int _fadeDecrement, int _particleNum)
-// - void run()
-// - boolean done()
-
 class Firework {
+  // Firework consists of:
   BallShell ballShell;
   ArrayList<Particle> particles;
-  float hue;
-  int fireworkCategory;
-  int particleNum;
-  int fadeDecrement;
 
-  Firework(float _x, float _y, int _fireworkCategory, int _fadeDecrement, int _particleNum) {
-    float ballShellHue = random(40, 60);
-    fireworkCategory = _fireworkCategory;
-    particleNum = _particleNum;
-    fadeDecrement = _fadeDecrement;
-
-    ballShell = new BallShell(_x, _y, ballShellHue);
+  // Firework with properties of:
+  boolean isExploded = false;
+  boolean withRandomMove = false;
+  int particleNum = 200;
+  int fadeDecrement = 3;
+  float seedParticleHue = random(360);
+  
+  Firework() {
+  }
+  
+  Firework(PVector _launch_coords) {
+    ballShell = new BallShell(_launch_coords, ballShellHue());
     particles = new ArrayList<Particle>();
-
-    sound.trigger();
+//    sound.trigger();
   }
 
   void run() {
-    // BALL SHELL'S LIFE
-    if (ballShell != null) {
-      ballShell.applyForce(gravity);
-      ballShell.update();
-      ballShell.draw();
+    if (!isExploded) {
+      update_ballshell();
+      // TODO: why update_explode ends with errors when called here run()
+    } else { 
+      update_particles();
+    }
+  }
+  
+  void update_ballshell() {
+    ballShell.applyForce(gravity);
+    ballShell.update();
+    ballShell.draw();
+    if (ballShell.readyToExplode()) update_explode();
+  }
+  
+  void update_explode() {
+    boolean withRandomMove = false;
+    float particleHue;
+    boolean isSpecialColors = (random(0,10) < 0.2); // rottery
+    
+    for (int i = 0; i < particleNum; i++) {
+      if (isSpecialColors) seedParticleHue = random(360);
+      particleHue = seedParticleHue + random(-10, 10);
+      particles.add(new Particle(ballShell.pos, particleHue, fadeDecrement, withRandomMove, true));
+    }
+    isExploded = true;
+  }
 
-      // BALL SHELL EXPLODES!!!
-      if (ballShell.readyToExplode()) {
-        // color variations and limitations by fireworkCategory(s)
-        boolean withRandomMove = false;
-        float seedParticleHue = random(360);
-        if (fireworkCategory == 1 ) seedParticleHue = random(40, 60);
-        else if (fireworkCategory == 4 ) seedParticleHue = random(40, 60);
-        else if (fireworkCategory == 5 ) withRandomMove = true;
-
-        float particleHue = seedParticleHue;
-        boolean isSpecialColors = (random(0,10) < 0.2); // rottery
-
-        for (int i = 0; i < particleNum; i++) {
-          if (isSpecialColors) seedParticleHue = random(360);
-          particleHue = seedParticleHue + random(-10, 10);
-          if (fireworkCategory == 6 && i > (particleNum / 2)) {
-            particles.add(new Particle(ballShell.pos, random(40, 60), fadeDecrement, withRandomMove, false));
-          } else {
-            particles.add(new Particle(ballShell.pos, particleHue, fadeDecrement, withRandomMove, true));
-          }
-        }
-        ballShell = null; // a ball shell ends its life
+  void update_particles() {
+    for (int i = 0; i < particles.size(); i++) {
+      Particle particle = particles.get(i);
+      particle.applyForce(gravity);
+      particle.run();
+      if (particle.isDead()) {
+        particles.remove(particle);
       }
     }
-
-    // PARTICLE(S)' LIFE
-    for (int i = 0; i < particles.size(); i++) {
-      Particle child = particles.get(i);
-      child.applyForce(gravity);
-      child.run();
-      if (child.isDead()) particles.remove(child);
-    }
   }
-
-  boolean done() { // removed if
-    return (ballShell == null && particles.isEmpty());
+    
+  void init_particles(int _fadeDecrement, int _particleNum) {
+    particleNum = _particleNum;
+    fadeDecrement = _fadeDecrement;
   }
-
+  
+  boolean done() {
+    return (isExploded && particles.isEmpty());
+  }
 }
