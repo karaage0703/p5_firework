@@ -9,37 +9,37 @@ class Firework {
   int particleNum = 200;
   int fadeDecrement = 3;
   float seedParticleHue = random(360);
-  
+
   Firework() {
   }
-  
+
   Firework(PVector _launch_coords) {
     ballShell = new BallShell(_launch_coords, ballShellHue());
     particles = new ArrayList<Particle>();
-//    sound.trigger();
+    sound.trigger();
   }
 
   void run() {
     if (!isExploded) {
       update_ballshell();
       // TODO: why update_explode ends with errors when called here run()
-    } else { 
+    } else {
       update_particles();
     }
   }
-  
+
   void update_ballshell() {
     ballShell.applyForce(gravity);
     ballShell.update();
     ballShell.draw();
     if (ballShell.readyToExplode()) update_explode();
   }
-  
+
   void update_explode() {
     boolean withRandomMove = false;
     float particleHue;
     boolean isSpecialColors = (random(0,10) < 0.2); // rottery
-    
+
     for (int i = 0; i < particleNum; i++) {
       if (isSpecialColors) seedParticleHue = random(360);
       particleHue = seedParticleHue + random(-10, 10);
@@ -58,12 +58,12 @@ class Firework {
       }
     }
   }
-    
+
   void init_particles(int _fadeDecrement, int _particleNum) {
     particleNum = _particleNum;
     fadeDecrement = _fadeDecrement;
   }
-  
+
   boolean done() {
     return (isExploded && particles.isEmpty());
   }

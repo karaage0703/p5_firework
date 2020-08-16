@@ -7,17 +7,17 @@ class FireworkE extends Firework {
   FireworkE(PVector _launch_coords) {
     ballShell = new BallShell(_launch_coords, ballShellHue());
     particles = new ArrayList<Particle>();
-//    sound.trigger();
+    sound.trigger();
   }
-  
+
   void update_explode() {
     float particleHue;
-    
+
     for (int i = 0; i < particleNum; i++) {
       particleHue = seedParticleHue + random(-10, 10);
 
       if (i > (particleNum / 2)) {
-        particles.add(new Particle(ballShell.pos, random(40, 60), fadeDecrement, true, false));            
+        particles.add(new Particle(ballShell.pos, random(40, 60), fadeDecrement, true, false));
       } else {
         particles.add(new Particle(ballShell.pos, particleHue, fadeDecrement, false, true));
       }
