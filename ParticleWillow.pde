@@ -9,34 +9,19 @@
 
 // TODO: Implementing Willow-style Particles
 class ParticleWillow extends Particle {
-  PVector pos;
-  PVector vel;
-  PVector acc;
-  color c;
-
-  // default parameters
-  int fadeDecrement = 3;
-  int particleHue = 50;
-  float particleBrightness = 20;
-  float velocityDecrement = 0.985;
-  float particleBrightnessDecrement;
-  boolean isLaunching = false;       // launching: true or exploded: false
-  boolean withRandomMove = false;    // random move
-  boolean withWillowBlur = false;    // TODO: Willow effect
-  boolean visible = true;            // control deplayed sparkles
-  
-  // special parameters for Willow
-  ArrayList<PVector> exCoords;       // buffering previous coordinates
-  
   ParticleWillow(PVector _pos, float _particleHue, int _fadeDecrement, boolean _withRandomMove, boolean _visible) {
     fadeDecrement = _fadeDecrement;
     withRandomMove = _withRandomMove;
     visible = _visible;
     
-    pos = new PVector(_pos.x, _pos.y);
+    //pos = new PVector(_pos.x, _pos.y);
+    pos = _pos;
     exCoords = new ArrayList<PVector>();
     exCoords.add(pos);
-    vel = PVector.random2D().mult(random(random(0.5, 5), 6));    
+    
+    // vel defines the shape
+    //vel = PVector.random2D().mult(random(random(0.5, 5), 6));    
+    vel = new PVector(random(-0.5,1), random(-0.5,1)).mult(random(random(0.5, 5), 6)); //experiments
     acc = new PVector(0, 0.1);
     c = color(_particleHue, 255, 255);
 
@@ -89,8 +74,4 @@ class ParticleWillow extends Particle {
   boolean isDead() {
     return (particleBrightness < 0);
   }
-  void setCoords(PVector _pos) {
-    pos = _pos;
-  }
-
 }
