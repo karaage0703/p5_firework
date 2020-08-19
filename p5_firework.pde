@@ -57,8 +57,8 @@ void keyPressed() {
       for (int j = 0; j < 6; j++) {
         Firework f = new Firework(v.launch_coords());
         f.add_particles("normal", 50, false, 1, 200)
-          .launch_from(width*i/5, height)
-          .launch_angle(60+10*j);
+         .launch_from(width*i/5, height)
+         .launch_angle(60+10*j);
         fireworks.add(f);
       }
     }
@@ -69,9 +69,9 @@ void keyPressed() {
       for (int j = 0; j < 6; j++) {
         Firework f = new Firework(v.launch_coords());
         f.add_particles("willow", 50, false, 4, 20)
-          .add_particles("delayed", 50, false, 5, 100)
-          .add_particles("sparkle", 100,  false, 2, 100)
-          .launch_from(width*i/4, height);
+         .add_particles("delayed", 50, false, 5, 100)
+         .add_particles("sparkle", 100,  false, 2, 100)
+         .launch_from(width*i/4, height);
         fireworks.add(f);
       } //<>//
     }  
@@ -89,13 +89,13 @@ void keyPressed() {
   else if (key == '5') {
     Firework f = new Firework(v.launch_coords());
     f.add_particles("normal", random(360), false, 3, 600)
-      .add_particles("delayed", 50, false, 3, 600);
+     .add_particles("delayed", 50, false, 3, 600);
     fireworks.add(f);
   } 
   else if (key == '6') {
     Firework f = new Firework(v.launch_coords());
     f.add_particles("normal", random(360), false, 3, 800)
-      .add_particles("delayed", 50, true, 3, 600);
+     .add_particles("delayed", 50, true, 3, 600);
     fireworks.add(f);
   }
   else if (key == '7') {
@@ -112,8 +112,20 @@ void keyPressed() {
     }
   }
   else if (key == '8') {
+    for (int i = 1; i < 4; i++) {
+      Firework f = new Firework(v.launch_coords());
+      f.launch_from(width*i/4, height)
+       .add_particles_drawing_large("test", 50, false, 3, 600);
+      fireworks.add(f);
+    }
   }
   else if (key == '9') {
+    for (int i = 1; i < 4; i++) {
+      Firework f = new Firework(v.launch_coords());
+      f.launch_from(width*i/4, height)
+       .add_particles_drawing_small("test", 50, false, 3, 600);
+      fireworks.add(f);
+    }
   }
   else if (key == '0') {
     FireworkZ firework = new FireworkZ(v.launch_coords());

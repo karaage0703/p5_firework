@@ -8,41 +8,14 @@
 // - boolean isDead()
 
 class ParticleDrawing extends Particle {
-  PVector pos;
-  PVector vel;
-  PVector acc;
-  color c;
-
-  // default parameters
-  int fadeDecrement = 3;
-  int particleHue = 50;
-  int particleLife = 100;
-  float ballShellBrightness = 100;
-  float particleBrightness = 100;
-  float velocityDecrement = 0.975;
-  float particleBrightnessDecrement;
-  boolean isLaunching = false;       // launching: true or exploded: false
-  boolean withRandomMove = false;    // random move
-  boolean visible = true;            // control deplayed sparkles
-
   ParticleDrawing(PVector _pos, float _particleHue, int _fadeDecrement, boolean _withRandomMove, boolean _visible, float _scale, int _rotate, PVector _vel) {
     fadeDecrement = _fadeDecrement;
     withRandomMove = _withRandomMove;
     visible = _visible;
     pos = new PVector(_pos.x, _pos.y);
-
-    // vel defines the shape
-    // TODO: continuous rotations
-    if (visible) {
-      //vel = PVector.random2D().mult(random(random(0.5, 5), 6));
-      float angle = random(0, 360);
+    vel = new PVector(_vel.x, _vel.y/_scale).rotate(radians(_rotate));
+    float angle = random(0, 360);
 //      PVector _vel = new PVector(cos(radians(angle)), sin(radians(angle))/_scale).rotate(radians(_rotate)); // affine trans.
-      vel = _vel.mult(random(3, 3.1));
-    } else {
-      // special particle (delayed sparkles)
-      vel = PVector.random2D().mult(random(random(0.5, 4), 5));
-    }
-
     acc = new PVector(0, 0.1);
     c = color(_particleHue, 255, 255);
     particleBrightnessDecrement = particleBrightness/random(fadeDecrement*20, fadeDecrement*40);
