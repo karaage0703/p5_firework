@@ -69,7 +69,7 @@ class ParticleSparkle extends Particle {
   boolean isDead() {
     return (particleBrightness < 0);
   }
-  
+
   void setCoords(PVector _pos) {
     pos = _pos;
   }

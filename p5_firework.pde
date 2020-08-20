@@ -25,7 +25,7 @@ void setup() {
 
   // audio
   minim = new Minim(this);
-  //sound = minim.loadSample("firework_sound.mp3", 2048);
+  sound = minim.loadSample("firework_sound.mp3", 2048);
 
   // instances
   gravity = new PVector(0.0, 0.1);
@@ -74,7 +74,7 @@ void keyPressed() {
          .launch_from(width*i/4, height);
         fireworks.add(f);
       } //<>//
-    }  
+    }
   }
   else if (key == '3') {
     Firework f = new Firework(v.launch_coords());
@@ -160,7 +160,7 @@ void displayMetrics() {
   text("# of fireworks", 5, 35);
   text(fireworks.size(), 100, 35); // draw the number of active fireworks
 }
-  
+
 float ballShellHue() {
   return random(40, 60);
 }

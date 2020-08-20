@@ -24,7 +24,7 @@ class Particle extends ParticleBase {
   boolean isLaunching = false;       // launching: true or exploded: false
   boolean withRandomMove = false;    // random move
   boolean visible = true;            // control deplayed sparkles
-  
+
   // special parameters for Willow
   ArrayList<PVector> exCoords;       // buffering previous coordinates
 
@@ -36,7 +36,7 @@ class Particle extends ParticleBase {
     withRandomMove = _withRandomMove;
     visible = _visible;
     pos = new PVector(_pos.x, _pos.y);
-    
+
     // vel defines the shape
     if (visible) {
       vel = PVector.random2D().mult(random(random(0.5, 5), 6));
@@ -93,7 +93,7 @@ class Particle extends ParticleBase {
   boolean isDead() {
     return (particleBrightness < 0);
   }
-  
+
   void setCoords(PVector _pos) {
     pos = _pos;
   }

@@ -6,16 +6,16 @@ class ParticleBase {
     update();
     draw();
   }
-  
+
   void update() {
   }
-  
+
   void draw() {
   }
-  
+
   void applyForce(PVector force) {
   }
-  
+
   boolean isDead() {
     return false;
   }
